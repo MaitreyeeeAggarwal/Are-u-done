@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+app/__init__.py
+app/config.py
+app/db.py
+app/llm.py
+app/main.py
+app/schemas.py
+app/services.py
+app/worker.py
+tests/test_contracts.py
+whatsapp_life_agent.egg-info/PKG-INFO
+whatsapp_life_agent.egg-info/SOURCES.txt
+whatsapp_life_agent.egg-info/dependency_links.txt
+whatsapp_life_agent.egg-info/requires.txt
+whatsapp_life_agent.egg-info/top_level.txt
