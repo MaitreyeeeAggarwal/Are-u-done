@@ -102,6 +102,10 @@ class Agent:
             await self.queue_reply(message.user_id, message.from_number, "Working on that…")
             await self.propose_goal(message, headed_goal)
             return
+        direct_list = self.direct_list_intent(message.body)
+        if direct_list:
+            await self.show_tasks(message, direct_list)
+            return
         try:
             intent = await self.llm.classify(message.body, now.isoformat())
         except LLMUnavailable as error:
@@ -164,6 +168,20 @@ class Agent:
             return None
         return IntentResult(intent=Intent.ADD_GOAL, goal_level=header.group(1).lower(), title="; ".join(items))
 
+    @staticmethod
+    def direct_list_intent(body: str) -> IntentResult | None:
+        """Handle common task-list requests without depending on the LLM."""
+        normalized = re.sub(r"\s+", " ", body.strip().lower())
+        today_requests = {
+            "today", "show today", "today's task", "today's tasks",
+            "todays task", "todays tasks", "show my today's inbox",
+            "show my todays inbox", "today's inbox", "todays inbox",
+            "my today's inbox", "my todays inbox", "show today's tasks",
+            "show todays tasks", "show my tasks today", "my tasks today",
+        }
+        if normalized in today_requests:
+            return IntentResult(intent=Intent.LIST_TASKS, view="today")
+        return None
     async def add_task(self, message: QueueMessage, intent: IntentResult) -> None:
         if not intent.title:
             await self.queue_reply(message.user_id, message.from_number, "What would you like me to add?")
