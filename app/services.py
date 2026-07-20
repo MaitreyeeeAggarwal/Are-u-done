@@ -59,6 +59,9 @@ class Agent:
 
     async def process(self, message: QueueMessage) -> None:
         onboarding_state = await self.onboarding.state(message.user_id)
+        if self.is_generated_goal_reset_command(message.body):
+            await self.reset_generated_goals(message)
+            return
         setup_command = message.body.strip().lower() in {"setup", "start over", "start setup"}
         if setup_command or (onboarding_state is None and await self.onboarding.should_start(message.user_id, message.body)):
             await self.queue_reply(message.user_id, message.from_number, await self.onboarding.start(message.user_id))
@@ -182,6 +185,19 @@ class Agent:
         if normalized in today_requests:
             return IntentResult(intent=Intent.LIST_TASKS, view="today")
         return None
+    @staticmethod
+    def is_generated_goal_reset_command(body: str) -> bool:
+        normalized = re.sub(r"\s+", " ", body.strip().lower())
+        return normalized in {"reset generated goals", "reset my generated goals"}
+
+    async def reset_generated_goals(self, message: QueueMessage) -> None:
+        result = await self.db.rpc("reset_generated_goals", {"p_user_id": message.user_id})
+        deleted_tasks = result[0]["deleted_task_count"] if result else 0
+        await self.queue_reply(
+            message.user_id,
+            message.from_number,
+            f"Reset complete � removed {deleted_tasks} generated goal task(s). Your manual tasks are still safe. Send �setup� when you�re ready to build a new plan.",
+        )
     async def add_task(self, message: QueueMessage, intent: IntentResult) -> None:
         if not intent.title:
             await self.queue_reply(message.user_id, message.from_number, "What would you like me to add?")

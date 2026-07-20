@@ -30,3 +30,8 @@ def test_common_today_requests_bypass_the_llm() -> None:
 
 def test_unrelated_message_is_not_treated_as_a_list_request() -> None:
     assert Agent.direct_list_intent("Add task today") is None
+
+def test_generated_goal_reset_requires_an_explicit_command() -> None:
+    assert Agent.is_generated_goal_reset_command("reset generated goals")
+    assert Agent.is_generated_goal_reset_command(" Reset my generated goals ")
+    assert not Agent.is_generated_goal_reset_command("reset goals")
