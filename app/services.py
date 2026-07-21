@@ -272,7 +272,7 @@ class Agent:
             return
         next_level = {"life":"yearly", "yearly":"monthly", "monthly":"weekly", "weekly":"daily", "daily":"daily"}[intent.goal_level]
         try:
-            plan = await self.llm.decompose(f"Break this {intent.goal_level} goal into concrete {next_level} items: {intent.title}. Return dated items only when justified.")
+            plan = await self.llm.decompose(f"Current local date and time: {datetime.now(self.tz).isoformat()}. Break this {intent.goal_level} goal into concrete {next_level} items that start from now, never using past dates. {intent.title}. Return dated items only when justified.")
         except LLMUnavailable:
             await self.queue_reply(message.user_id, message.from_number, "I saved nothing because planning is temporarily unavailable. Please try again shortly.")
             return

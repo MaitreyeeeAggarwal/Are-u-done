@@ -76,7 +76,8 @@ class Onboarding:
 
         async def create_for_parent(parent: dict) -> tuple[str, list[dict]] | None:
             try:
-                plan = await self.llm.decompose(f"Break this {parent['level']} goal into practical {child_level} goals: {parent['title']}")
+                now = datetime.now(self.tz).isoformat()
+                plan = await self.llm.decompose(f"Current local date and time: {now}. Create only practical {child_level} goals that start from now; never propose dates or months in the past. Break this {parent['level']} goal into concrete next steps: {parent['title']}")
             except LLMUnavailable:
                 return None
             children = await self.db.rpc("create_proposed_children", {"p_user_id": user_id, "p_parent_goal_id": parent["id"], "p_level": child_level, "p_items": [item.model_dump(mode="json") for item in plan.items[:MAX_CHILDREN_PER_PARENT]]})

@@ -41,7 +41,7 @@ class Worker:
                 await self.db.rpc("fail_outbox", {"p_outbox_id": row["id"], "p_worker_id": self.settings.worker_id, "p_error": str(error), "p_max_attempts": self.settings.max_delivery_attempts})
 
     async def reminders_and_reviews(self) -> None:
-        await self.db.rpc("queue_due_reminders", {"p_worker_id": self.settings.worker_id})
+        await self.db.rpc("queue_due_reminders", {"p_worker_id": self.settings.worker_id, "p_timezone": self.settings.timezone})
         await self.db.rpc("queue_due_reviews", {"p_timezone": self.settings.timezone})
         await self.db.rpc("expire_conversation_state", {})
 
