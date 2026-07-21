@@ -64,8 +64,8 @@ class Onboarding:
     async def _capture_yearly(self, user_id: str, body: str) -> list[str]:
         try:
             items = await self.llm.extract_goals(body, "yearly")
-        except LLMUnavailable:
-            return ["I couldn’t read those goals right now. Please send them again in a short list."]
+        except LLMUnavailable as error:
+            return [f"Goal planning is unavailable right now: {error}. Please try again shortly."]
         parents = await self.db.rpc("create_active_goals", {"p_user_id": user_id, "p_level": "yearly", "p_items": [item.model_dump(mode="json") for item in items.items]})
         return await self._propose_children(user_id, parents, "monthly")
 
