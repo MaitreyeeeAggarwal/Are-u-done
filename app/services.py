@@ -8,6 +8,7 @@ from .config import Settings
 from .db import Database
 from .llm import LLMUnavailable, NvidiaLLM
 from .onboarding import Onboarding
+from .assessment import Assessment
 from .schemas import Intent, IntentResult, QueueMessage
 
 
@@ -53,6 +54,7 @@ class Agent:
         self.db, self.llm, self.settings = db, llm, settings
         self.tz = ZoneInfo(settings.timezone)
         self.onboarding = Onboarding(db, llm, settings.timezone)
+        self.assessment = Assessment(db, settings.timezone)
 
     async def queue_reply(self, user_id: str, to: str, body: str, kind: str = "reply") -> None:
         await self.db.insert("outbox", {"user_id": user_id, "to_number": to, "body": body, "kind": kind})
