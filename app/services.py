@@ -64,6 +64,10 @@ class Agent:
         if self.is_generated_goal_reset_command(message.body):
             await self.reset_generated_goals(message)
             return
+        assessment_reply = await self.assessment.handle(message)
+        if assessment_reply is not None:
+            await self.queue_reply(message.user_id, message.from_number, assessment_reply)
+            return
         setup_command = message.body.strip().lower() in {"setup", "start over", "start setup"}
         if setup_command or (onboarding_state is None and await self.onboarding.should_start(message.user_id, message.body)):
             await self.queue_reply(message.user_id, message.from_number, await self.onboarding.start(message.user_id))
